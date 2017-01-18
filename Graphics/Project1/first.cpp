@@ -59,17 +59,17 @@ void DrawCube(){
 		glEnd();
 }
 
-void display(){
+void display(double rat){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glColor3f(1.0,0.0,0.0);
+    DrawCube();
     glTranslatef(0,0,-5);
-    glRotatef(45,45,45,1);
-    glScalef(1,1,1);
+    glRotatef(45+rat*10,45-rat*10,45+rat*10,1);
+    glTranslatef(0,0.5-rat*1.0/100,0);
     DrawCube();
 }
-int main(int argc, char* args[])
-{
+int main(int argc, char* args[]){
     SDL_Init(SDL_INIT_EVERYTHING);
 
     SDL_SetVideoMode(640,480,32,SDL_SWSURFACE|SDL_OPENGL);
@@ -78,16 +78,28 @@ int main(int argc, char* args[])
 //    Uint32 start;
     SDL_Event zdarzenie;
     init();
+    int rat = 0;
+    bool up = true;
     while (petla==1)
     {
 //        start=SDL_GetTicks();
-        while (SDL_PollEvent(&zdarzenie))
-        {
-            switch(zdarzenie.type)
-            {
+        while (SDL_PollEvent(&zdarzenie)){
+            switch(zdarzenie.type){
                 case SDL_QUIT:
                 petla=0;
                 break;
+            }
+        }
+        if(up){
+            rat += 1;
+            if(rat >= 100){
+                up = false;
+            }
+        }
+        else{
+            rat -= 1;
+            if(rat <= 0){
+                up = true;
             }
         }
         display();
