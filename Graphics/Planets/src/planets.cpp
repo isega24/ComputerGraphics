@@ -27,7 +27,7 @@ GLfloat MaterialShininess[] ={ 70.0 };
 GLfloat MaterialSpecular[] ={ 1.0, 1.0, 1.0, 1.0 };
 
 double const square = 10;
-float angle = 0.0, dist = -10,vecX = 0 ,vecY = 1,vecZ = 0;
+float angleX = 0, angleY = 0, angleZ = 0, dist = -10,vecX[] = {1,0,0} ,vecY[] = {0,1,0},vecZ[] = {0,0,1};
 
 static double * body_mass, * positionX, * nextPositionX, * positionY, * nextPositionY,
               * velocityX, * nextVelocityX, * velocityY, * nextVelocityY, accuracy, PI = 3.141592654;
@@ -140,8 +140,10 @@ void display(){
     glEnable(GL_LIGHT1);
     glLoadIdentity();
     glTranslatef(0,0,dist);
-    glRotatef(angle,vecX,vecY,vecZ);
-    double colour = 0.5, inc = 1.0/n_bodies;
+    glRotatef(angleX,vecX[0],vecX[1],vecX[2]);
+    glRotatef(angleY,vecY[0],vecY[1],vecY[2]);
+    glRotatef(angleZ,vecZ[0],vecZ[1],vecZ[2]);
+    double colour = 0.5, inc = 0.5/n_bodies;
     glColor3f(1,1,1);
     glBegin(GL_QUADS);
         glVertex3f(-square,-square,0);
@@ -150,7 +152,7 @@ void display(){
         glVertex3f(square,-square,0);
     glEnd();
     for(int i = 0; i < n_bodies; i ++){
-        glColor3f(colour,1-colour,colour*colour);
+        glColor3f(colour,1-colour,colour);
         drawSphere(i);
         colour+=inc;
     }
@@ -238,7 +240,7 @@ int main(int argc, char const *argv[]) {
 
     int petla=1;
     SDL_Event myevent;
-    bool space, down, up, right, left;
+    bool space, w, s, down, up, right, left;
     space = down = up = right = left = false;
     while(petla == 1){
         while (SDL_PollEvent(&myevent)){
@@ -247,21 +249,13 @@ int main(int argc, char const *argv[]) {
                 petla=0;
                 break;
                 case SDL_KEYDOWN:
-                if (myevent.key.keysym.sym==SDLK_SPACE){
-                    space = true;
-                }
-                if( myevent.key.keysym.sym == SDLK_DOWN){
-                    down = true;
-                }
-                if( myevent.key.keysym.sym == SDLK_UP){
-                    up = true;
-                }
-                if( myevent.key.keysym.sym == SDLK_RIGHT){
-                    right = true;
-                }
-                if( myevent.key.keysym.sym == SDLK_LEFT) {
-                    left = true;
-                }
+                if (myevent.key.keysym.sym==SDLK_SPACE) space = true;
+                if( myevent.key.keysym.sym == SDLK_DOWN) down = true;
+                if( myevent.key.keysym.sym == SDLK_UP) up = true;
+                if( myevent.key.keysym.sym == SDLK_RIGHT) right = true;
+                if( myevent.key.keysym.sym == SDLK_LEFT) left = true;
+                if( myevent.key.keysym.sym == SDLK_w) w = true;
+                if( myevent.key.keysym.sym == SDLK_s) s = true;
                 break;
                 case SDL_KEYUP:
                 if (myevent.key.keysym.sym==SDLK_SPACE) space = false;;
@@ -269,6 +263,8 @@ int main(int argc, char const *argv[]) {
                 if( myevent.key.keysym.sym == SDLK_UP) up = false;
                 if( myevent.key.keysym.sym == SDLK_RIGHT) right = false;
                 if( myevent.key.keysym.sym == SDLK_LEFT) left = false;
+                if( myevent.key.keysym.sym == SDLK_w) w = false;
+                if( myevent.key.keysym.sym == SDLK_s) s = false;
                 break;
 
             }
@@ -277,16 +273,22 @@ int main(int argc, char const *argv[]) {
             //angle+=1;
         }
         if(up){
-            dist+=1;
+            angleX+=1;
         }
         if(down){
-            dist -=1;
+            angleX -=1;
         }
         if(right){
-            angle +=1;
+            angleY +=1;
         }
         if(left){
-            angle-=1;
+            angleY -=1;
+        }
+        if(w){
+            dist-=1;
+        }
+        if(s){
+            dist+=1;
         }
         for(int j = 0; j < n_bodies; j++){
             calcGForce(j,forceX, forceY);
