@@ -26,7 +26,8 @@ GLfloat MaterialDiffuse[]={ 1.0f, 1.0f, 0.1f, 1.0f };
 GLfloat MaterialShininess[] ={ 70.0 };
 GLfloat MaterialSpecular[] ={ 1.0, 1.0, 1.0, 1.0 };
 
-float angle = 0.0, dist = -10,vecX = 0 ,vecY = 0,vecZ = 1;
+double const square = 10;
+float angle = 0.0, dist = -10,vecX = 0 ,vecY = 1,vecZ = 0;
 
 static double * body_mass, * positionX, * nextPositionX, * positionY, * nextPositionY,
               * velocityX, * nextVelocityX, * velocityY, * nextVelocityY, accuracy, PI = 3.141592654;
@@ -59,7 +60,7 @@ void init(){
     glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, SpotCutoff);
     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
 
-//    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT1);
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, MaterialAmbient);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, MaterialDiffuse);
@@ -134,15 +135,20 @@ void drawSphere(int k){
     }
 }
 
-void display(double grades){
+void display(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_LIGHT1);
     glLoadIdentity();
     glTranslatef(0,0,dist);
     glRotatef(angle,vecX,vecY,vecZ);
-    //glRotatef(45,)
     double colour = 0.5, inc = 1.0/n_bodies;
-
+    glColor3f(1,1,1);
+    glBegin(GL_QUADS);
+        glVertex3f(-square,-square,0);
+        glVertex3f(-square,square,0);
+        glVertex3f(square,square,0);
+        glVertex3f(square,-square,0);
+    glEnd();
     for(int i = 0; i < n_bodies; i ++){
         glColor3f(colour,1-colour,colour*colour);
         drawSphere(i);
@@ -232,7 +238,6 @@ int main(int argc, char const *argv[]) {
 
     int petla=1;
     SDL_Event myevent;
-    int grades = 0;
     bool space, down, up, right, left;
     space = down = up = right = left = false;
     while(petla == 1){
@@ -291,6 +296,14 @@ int main(int argc, char const *argv[]) {
             // Calculing next velocity.
             nextVelocityX[j] = velocityX[j] + accuracy*forceX/body_mass[j];
             nextVelocityY[j] = velocityY[j] + accuracy*forceY/body_mass[j];
+            if((nextPositionX[j]>= square and nextVelocityX[j]> 0) or (nextPositionX[j] <= -square and nextVelocityX[j] < 0)){
+                nextVelocityX[j] = -nextVelocityX[j];
+            }
+            if((nextPositionY[j]>= square and nextVelocityY[j]> 0) or (nextPositionY[j] <= -square and nextVelocityY[j] < 0)){
+                nextVelocityY[j] = -nextVelocityY[j];
+            }
+
+
         }
 
         // Calculing the next step and displaing the position.
@@ -300,11 +313,7 @@ int main(int argc, char const *argv[]) {
             velocityX[j] = nextVelocityX[j];
             velocityY[j] = nextVelocityY[j];
         }
-        grades += 5;
-        grades = grades%360;
-        display(grades);
-
-
+        display();
         SDL_GL_SwapBuffers();
     }
     SDL_Quit();
